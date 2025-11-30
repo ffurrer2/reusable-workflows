@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: MIT
+name: 'Random number'
+description: 'Generates a random number.'
+outputs:
+  random-number:
+    description: 'A random number.'
+    value: ${{ steps.random-number-generator.outputs.random-number }}
+runs:
+  using: 'composite'
+  steps:
+  - id: random-number-generator
+    run: echo "random-number=${RANDOM}" >> "${GITHUB_OUTPUT}"
+    shell: bash

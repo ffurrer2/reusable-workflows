@@ -1,0 +1,46 @@
+# SPDX-License-Identifier: MIT
+name: 'gitleaks'
+description: 'Run gitleaks to detect secrets in your repository.'
+inputs:
+  version:
+    description: 'The gitleaks version to use. Default: `latest`'
+    required: false
+    default: '8.21.2' # https://github.com/gitleaks/gitleaks/releases
+  os:
+    description: 'The operating system to use. Default: `linux`'
+    required: false
+    default: 'linux'
+  arch:
+    description: 'The architecture to use. Default: `x64`'
+    required: false
+    default: 'x64'
+  command:
+    description: 'The gitleaks command to run. Default: `detect`'
+    required: false
+    default: 'detect'
+  flags:
+    description: 'The gitleaks flags to use. Default: `--redact --verbose`'
+    required: false
+    default: '--redact --verbose'
+  github-token:
+    description: 'The GitHub token to use for authentication.'
+    required: true
+    default: '${{ github.token }}'
+runs:
+  using: 'composite'
+  steps:
+  - name: Setup gitleaks
+    shell: bash
+    run: |
+      set -e
+      curl -fsSLo "${{ runner.temp }}/gitleaks.tar.gz" -H 'Authorization: token ${{ inputs.github-token }}' https://github.com/gitleaks/gitleaks/releases/download/v${{ inputs.version }}/gitleaks_${{ inputs.version }}_${{ inputs.os }}_${{ inputs.arch }}.tar.gz
+      mkdir "${{ runner.temp }}/gitleaks"
+      tar zxvf "${{ runner.temp }}/gitleaks.tar.gz" -C "${{ runner.temp }}/gitleaks"
+      mv "${{ runner.temp }}/gitleaks/gitleaks" /usr/local/bin/gitleaks
+      gitleaks --version
+
+  - name: Run gitleaks
+    shell: bash
+    run: |
+      set -e
+      gitleaks ${{ inputs.command }} ${{ inputs.flags }}

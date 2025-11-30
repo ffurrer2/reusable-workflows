@@ -1,0 +1,33 @@
+# SPDX-License-Identifier: MIT
+name: Lint GitHub Actions workflows
+
+on:
+  workflow_call:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # renovate: datasource=github-releases depName=actionlint packageName=rhysd/actionlint versioning=semver
+  ACTIONLINT_VERSION: 1.7.9
+
+jobs:
+  actionlint:
+    runs-on: ubuntu-24.04
+    permissions: {}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+
+    - name: Setup actionlint
+      shell: bash
+      run: |
+        set -e
+        curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash | bash -s -- ${{ env.ACTIONLINT_VERSION }} /usr/local/bin
+        actionlint -version
+
+    - name: Check workflow files
+      shell: bash
+      run: |
+        actionlint -color -shellcheck shellcheck -verbose

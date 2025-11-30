@@ -1,0 +1,49 @@
+# SPDX-License-Identifier: MIT
+name: 'GitHub Release'
+description: 'Create a GitHub release.'
+inputs:
+  repo-token:
+    description: 'The repository token to use for authentication. Can be passed in using `{{ secrets.GITHUB_TOKEN }}`.'
+    required: false
+    default: '${{ github.token }}'
+  repo:
+    description: 'The repository to use for the release.'
+    required: false
+    default: '${{ github.repository }}'
+  draft:
+    description: 'Whether to create a draft release.'
+    required: false
+    default: 'false'
+  notes:
+    description: 'The release notes to use for the release.'
+    required: true
+  prerelease:
+    description: 'Whether to create a prerelease.'
+    required: false
+    default: 'false'
+  target:
+    description: 'Target branch or full commit SHA.'
+    required: false
+    default: 'main'
+  title:
+    description: 'The title of the release.'
+    required: true
+  verify-tag:
+    description: 'Whether to verify the tag.'
+    required: false
+    default: 'false'
+  tag:
+    description: 'The Git tag to use for the release.'
+    required: true
+  files:
+    description: 'The files to include in the release.'
+    required: false
+    default: ''
+runs:
+  using: 'composite'
+  steps:
+  - name: 'Create release'
+    env:
+      GITHUB_TOKEN: ${{ inputs.repo-token }}
+    run: gh release create --repo ${{ inputs.repo }} --draft=${{ inputs.draft }} --notes '${{ inputs.notes }}' --prerelease=${{ inputs.prerelease }} --target=${{ inputs.target }}  --title '${{ inputs.title }}' --verify-tag=${{ inputs.verify-tag }} ${{ inputs.tag }} ${{ inputs.files }}
+    shell: bash

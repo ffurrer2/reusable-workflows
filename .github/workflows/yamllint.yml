@@ -1,0 +1,41 @@
+# SPDX-License-Identifier: MIT
+name: yamllint
+
+on:
+  workflow_call:
+    inputs:
+      additional_args:
+        description: 'Additional yamllint arguments'
+        required: false
+        default: ''
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # renovate: datasource=github-releases depName=yamllint packageName=adrienverge/yamllint versioning=semver
+  YAMLLINT_VERSION: 1.37.1
+
+jobs:
+  yamllint:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+    - name: Checkout
+      uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      with:
+        persist-credentials: false
+
+    - name: Setup yamllint
+      shell: bash
+      run: |
+        set -e
+        pip install --user yamllint==${{ env.YAMLLINT_VERSION }}
+
+    - name: yamllint
+      shell: bash
+      run: |
+        yamllint --config-file .github/linters/.yaml-lint.yml --format github --strict ${{ inputs.additional_args }} .
