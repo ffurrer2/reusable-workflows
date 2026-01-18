@@ -16,7 +16,7 @@ concurrency:
 
 env:
   # renovate: datasource=github-releases depName=yamllint packageName=adrienverge/yamllint versioning=semver
-  YAMLLINT_VERSION: 1.37.1
+  YAMLLINT_VERSION: 1.38.0
 
 jobs:
   yamllint:
