@@ -10,7 +10,7 @@ concurrency:
 
 env:
   # renovate: datasource=github-releases depName=actionlint packageName=rhysd/actionlint versioning=semver
-  ACTIONLINT_VERSION: 1.7.10
+  ACTIONLINT_VERSION: 1.7.11
 
 jobs:
   actionlint:
