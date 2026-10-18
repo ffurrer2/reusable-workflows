@@ -1,0 +1,59 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-26.04
+    if: ${{ github.ref == 'refs/heads/main' }}
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set environment variables
+        shell: bash
+        run: |
+          set -e
+          VERSION=$(scripts/version.sh)
+          echo "VERSION=${VERSION}" >> "${GITHUB_ENV}"
+          echo "VERSION_TAG=v${VERSION}" >> "${GITHUB_ENV}"
+          cat "${GITHUB_ENV}"
+
+      - name: Create Git tag
+        shell: bash
+        run: |
+          set -e
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          if git rev-parse "${{ env.VERSION_TAG }}" >/dev/null 2>&1; then
+            echo "Git tag ${{ env.VERSION_TAG }} already exists."
+          else
+            git tag --annotate --message='release ${{ env.VERSION_TAG }}' ${{ env.VERSION_TAG }}
+            echo "Git tag ${{ env.VERSION_TAG }} created."
+          fi
+
+      - name: Push Git tag
+        shell: bash
+        run: |
+          set -e
+          if git ls-remote --tags origin | grep -q "refs/tags/${{ env.VERSION_TAG }}$"; then
+            echo "Git tag ${{ env.VERSION_TAG }} already exists on remote."
+          else
+            git push origin ${{ env.VERSION_TAG }}
+            echo "Git tag ${{ env.VERSION_TAG }} pushed."
+          fi
