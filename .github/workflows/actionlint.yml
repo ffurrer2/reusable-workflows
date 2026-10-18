@@ -8,26 +8,15 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  # renovate: datasource=github-releases depName=actionlint packageName=rhysd/actionlint versioning=semver
-  ACTIONLINT_VERSION: 1.7.12
-
 jobs:
   actionlint:
     runs-on: ubuntu-26.04
-    permissions: {}
+    permissions:
+      contents: read
     steps:
     - name: Checkout
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
 
-    - name: Setup actionlint
-      shell: bash
-      run: |
-        set -e
-        curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash | bash -s -- ${{ env.ACTIONLINT_VERSION }} /usr/local/bin
-        actionlint -version
-
-    - name: Check workflow files
-      shell: bash
-      run: |
-        actionlint -color -shellcheck shellcheck -verbose
+    - uses: kjanat/actionlint@08bb2c4f0d039744455b87aef1c647fb8b66d37b # v1.17.0

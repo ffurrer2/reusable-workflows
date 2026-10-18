@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: MIT
 name: 'GitHub Release'
 description: 'Create a GitHub release.'
+# Required caller permissions:
+#   contents: write
 inputs:
   repo-token:
     description: 'The repository token to use for authentication. Can be passed in using `{{ secrets.GITHUB_TOKEN }}`.'
